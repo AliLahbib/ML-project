@@ -32,11 +32,14 @@ COPY . /app
 
 # Set PYTHONPATH so imports like `from model import ...` work (src is on PYTHONPATH)
 ENV PYTHONPATH=/app/src
+ENV PORT=8080
 
 # Give ownership to non-root user and switch
 RUN chown -R appuser:appuser /app
 USER appuser
 
-# Expose nothing in particular; this image is mainly for running the small CLI prediction example
-# Default command: run the example prediction script
-CMD ["python", "src/predict.py"]
+# Expose port for the application
+EXPOSE 8080
+
+# Default command: run the Flask app with gunicorn. Use module `server:app` because PYTHONPATH=/app/src
+CMD ["gunicorn", "server:app", "-b", "0.0.0.0:8080", "--workers", "1"]
